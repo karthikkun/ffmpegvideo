@@ -5,10 +5,9 @@ import { FFmpegKit, FFmpegKitConfig, FFprobeKit, ReturnCode } from 'ffmpeg-kit-r
 import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, Text, View, SafeAreaView } from 'react-native';
 import ImageViewer from './ImageViewer';
-import FrameView from './FrameView';
 
 export default function App() {
-  
+  const flag = false;
   const DocumentDir = FileSystem.documentDirectory;
   const CacheDir = FileSystem.cacheDirectory;
   const stepFrameDir = `${CacheDir}/stepframe`;
@@ -44,9 +43,8 @@ export default function App() {
     FFprobeKit.getMediaInformation(videoUrl).then(
       (information) => {
         console.log('Result: ' + JSON.stringify(information));
-        const FRAME_PER_SEC = 1/5;
-        const ffmpegCommand2 = `-ss 0 -i ${videoUrl} -r ${FRAME_PER_SEC} ${outputImagePath}/stepframe%04d.jpg`;
-        const ffmpegCommand = `-ss 0 -i ${videoUrl} -vf "fps=0.4" -vsync vfr -q:v 2 -f image2 ${outputImagePath}/stepframe%04d.jpeg`;
+        const FRAME_PER_SEC = 1;
+        const ffmpegCommand = `-ss 0 -i ${videoUrl} -r ${FRAME_PER_SEC} ${outputImagePath}/stepframe%04d.png`;
         FFmpegKit.executeAsync(
           ffmpegCommand,
           async session => {
@@ -109,10 +107,7 @@ export default function App() {
     FFprobeKit.getMediaInformation(videoUrl).then(
       (information) => {
         console.log('Result: ' + JSON.stringify(information));
-        const ffmpegCommand = `-i ${videoUrl} -vf \"select=eq(pict_type\\,I)\" -vsync vfr -q:v 2 -f image2 ${outputImagePath}/keyframe%04d.jpeg`
-        console.log('command............', ffmpegCommand)
-        const ffmpegCommand3 = `-ss 0 -i ${videoUrl} -vf \"select=eq(pict_type\\,I),select='gt(scene\\,x\/100)'\" -vsync vfr ${outputImagePath}/keyframe%04d.png`
-        const ffmpegCommand2 = `-ss 0 -skip_frame nokey -i ${videoUrl} -vsync vfr -frame_pts true ${outputImagePath}/keyframe%04d.png`;
+        const ffmpegCommand = `-skip_frame nokey -i ${videoUrl} -vsync vfr -frame_pts true ${outputImagePath}/keyframe%04d.png`;
         FFmpegKit.executeAsync(
           ffmpegCommand,
           async session => {
@@ -217,9 +212,9 @@ export default function App() {
     return <Text>No access to camera</Text>;
   }
   return (
-    <View style={styles.mainContainer}>
-      {frames ? (
-        <FrameView frames={frames}/>
+    <View>
+      {flag ? (
+        <ImageViewer frames={frames}/>
       ) : (
         <>
           <View style={{ flex: 1}}>
